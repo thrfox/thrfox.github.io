@@ -24,7 +24,9 @@ layout: default
                 {% include featured-tags.html %}
 
                 <!-- Friends Blog -->
-                {% include friends.html %}
+                {% comment %} 
+                  {% include friends.html %}
+                {% endcomment %} 
             </div>
         {% else %}
 
@@ -51,10 +53,15 @@ layout: default
                 {% include featured-tags.html %}
 
                 <!-- Short About -->
-                {% include short-about.html %}
+                {% comment %} 
+                  {% include short-about.html %}
+                {% endcomment %}
+                
 
                 <!-- Friends Blog -->
-                {% include friends.html %}
+                {% comment %} 
+                  {% include friends.html %}
+                {% endcomment %} 
     		</div>
         {% endif %}
 	</div>
