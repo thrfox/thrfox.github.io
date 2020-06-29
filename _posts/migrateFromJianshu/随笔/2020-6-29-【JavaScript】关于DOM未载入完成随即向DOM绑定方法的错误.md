@@ -8,7 +8,7 @@ tags:
   - 随笔
 ---
 
-###描述
+### 描述
 grid在reload的时候会重新载入DOM,若DOM在未载入完成随即向DOM绑定autocomplete方法可能会造成不可知的错误
 ```Javascript
 function loadGrid() {

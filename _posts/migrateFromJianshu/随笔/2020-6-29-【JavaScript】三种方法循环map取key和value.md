@@ -14,13 +14,13 @@ for(var key in cssMap) {
   content.css(key, cssMap[key]);
 }
 ```
-```
+```js
 var key = Object.keys(cssMap);
 for(var j = 0;j < key.length;j++) {
   content.css(key[j], cssMap[key[j]]);
 }
 ```
-```
+```js
 $.each(cssMap,function (i,v) {
   content.css(i,v);
 })

@@ -8,9 +8,9 @@ tags:
   - IDE编辑器
 ---
 
-###1.导入相关的源码包
+### 1.导入相关的源码包
 
-###2.调出Debug View
+### 2.调出Debug View
 - 2.1 右键单击Tomcat 服务器，选择Edit source lookup
 - 2.2 点击add
 - 2.3 选择Java Project  添加项目

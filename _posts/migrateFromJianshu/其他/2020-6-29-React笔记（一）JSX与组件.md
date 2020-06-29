@@ -8,13 +8,14 @@ tags:
   - 其他
 ---
 
-###定义一个变量
+### 定义一个变量
       const element = <h1>Hello，world.</h1>
 该变量既不是string也不是HTML，而是被称作JSX
->JSX is an XML/HTML-like syntax used by React that extends ECMAScript so that XML/HTML-like text can co-exist with JavaScript/React code.
+> JSX is an XML/HTML-like syntax used by React that extends ECMAScript so that XML/HTML-like text can co-exist with JavaScript/React code.
 JSX我理解为JS语法混合着XML语法
 JSX不是React所必须的，但其可以更简便的使UI设计混合在JS语法中
-###在JSX中可以嵌入任意JS语句
+
+### 在JSX中可以嵌入任意JS语句
 ```
 function add(x,y){
   return x + y;
@@ -27,7 +28,7 @@ ReactDOM.render(
   document.getElementById('root')
 );
 ```
-###组件与props
+### 组件与props
 props可以理解为一个object
 ```
 function Welcome(prop){  //称为组件
@@ -41,6 +42,7 @@ ReactDOM.render(
   document.getElementById('root')
 );
 ```
+
 在以上代码中，分为四步
   1.ReactDOM.render渲染element
   2.element中发现Welcome作为组件并且带有props对象，该对象可以携带多个参数如String,Date,object等，如该例携带了JSON {name: 'Sara'}
@@ -50,9 +52,10 @@ ReactDOM.render(
   时刻注意组件名称首字母大写，有一下原因：
   1.React识别首字母小写的为DOM标签，如<div />。
   2.首字母大写则视为组件，如<Welcome />。
-###在一个复杂的App中提取部分作为组件
-######以下为需渲染的app
-```
+
+### 在一个复杂的App中提取部分作为组件
+###### 以下为需渲染的app
+```javascript
 function Comment(props) {
   return (
     <div className="Comment">
@@ -75,8 +78,8 @@ function Comment(props) {
   );
 }
 ```
-######提取关键部分为组件后
-```
+###### 提取关键部分为组件后
+```javascript
 function formatDate(date) {
   return date.toLocaleDateString();
 }
@@ -130,20 +133,21 @@ ReactDOM.render(
   />,
   document.getElementById('root')
 );
+
 ```
->注意：在React中，
+> 注意：在React中，
 所有的组件中的props都应该为只读的(read-only)
 即props对象不应该被组件中的代码所修改，比较以下两个代码
 
-```
+```javascript
 function sum(a, b) {
   return a + b;
 }
 ```
-____
-```
+---
+```javascript
 function withdraw(account, amount) {
   account.total -= amount;
 }
 ```
-____
+---

@@ -9,11 +9,11 @@ tags:
 ---
 
 需要组件：
-1.docker
-2.docker-compose
+1. docker
+2. docker-compose
 # 步骤1
 安装上述组件
-```
+```bash
 # 安装docker
 $ curl -fsSL get.docker.com -o get-docker.sh
 $ sudo sh get-docker.sh
@@ -24,7 +24,7 @@ $ docker-compose --version
 ```
 # 步骤2
 查看uid与gid
-```
+```bash
 $ id <用户名>
 uid=1001(thrza) gid=0(root) groups=0(root),4(adm),39(video),994(docker),1000(google-sudoers)
 # 没有docker组的需要创建
@@ -33,12 +33,12 @@ $ sudo usermod -aG docker <USER> # 用户名
 $ logout # 重新登录
 ```
 docker-compose安装wordpress和mysql
-```
+```bash
 $ cd ~/wordpress
 $ vi docker-compose.yml
 ```
 复制以下，需要有部分地方需要修改，不需要SSL的可以删去letsencrypt部分，但是需要将wordpress暴露80端口
-```
+```yml
 version: '3.3'
 
 services:
@@ -93,7 +93,7 @@ services:
 $ vi ~/wordpress/letsencrypt/nginx/site-confs/default
 ```
 复制以下配置，转发至wordpress的80端口，来自参考文章
-```
+```conf
 # redirect all traffic to https
 server {
   listen 80;
