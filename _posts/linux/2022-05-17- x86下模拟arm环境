@@ -1,0 +1,27 @@
+---
+layout: post
+title: x86下模拟arm环境
+subtitle: linux
+author: "thrfox"
+header-style: text
+tags:
+  - linux
+---
+
+## 环境
+ubuntu 18.04
+
+## 安装docker
+```sh
+apt-get install docker
+```
+## 安装qemo
+```sh
+
+```
+
+## 启动镜像
+```sh
+docker run -itd --name arm-ubuntu multiarch/ubuntu-core:arm64-bionic /bin/bash # arm ubuntu
+docker run -itd --name arm-centos multiarch/centos:aarch64-clean /bin/bash # arm centos7
+```
