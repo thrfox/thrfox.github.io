@@ -33,5 +33,12 @@ pom.xml 依赖
 @RunWith(SpringRunner.class) // 引入spring运行环境的context
 @SpringBootTest
 public class StorageBuildTest {
+    
+    // 设置配置文件属性
+    @BeforeClass
+    public static void setSystemProperty() {
+        Properties properties = System.getProperties();
+        properties.setProperty("property.type", "4");
+    }
 }
 ~~~

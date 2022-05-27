@@ -1,11 +1,11 @@
 # Site settings
-title: Thrfox Blog
-SEOTitle: Thrfox Blog | 马柱泉的博客
+title: Azukin Blog
+SEOTitle: Azukin Blog | 马柱泉的博客
 header-img: img/home-bg.jpg
 email: www4836@gmail.com
 description: "这里是 @马柱泉 的个人博客"
-keyword: "马柱泉, 马柱泉博客, Thrfox Blog, 博客, 个人网站, 互联网, Web, JavaScript, 前端"
-url: "https://lifeisff.fun"              # your host, for absolute URL
+keyword: "马柱泉, 马柱泉博客, Azukin Blog, 博客, 个人网站, 互联网, Web, JavaScript, 前端"
+url: "https://mazq.cn"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
