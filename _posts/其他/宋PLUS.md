@@ -3,7 +3,7 @@
 ## 比亚迪提车检查表2022-04-10最新版
 https://www.bilibili.com/read/cv16072883
 
-验车验什么？宋PLUS DM-I怎么验车？实拍分享实用经验
+## 验车验什么？宋PLUS DM-I怎么验车？实拍分享实用经验
 https://www.bilibili.com/video/BV1wr4y1r7Ey?spm_id_from=333.851.header_right.fav_list.click
 重要通知！未验车的注意！玻璃生产日期算法有变
 验车表附件，百度网盘链接：https://pan.baidu.com/s/1l_GZm4p3izOfEnzeyu1SNw 
