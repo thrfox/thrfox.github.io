@@ -235,3 +235,20 @@ output{
 }
 
 ~~~
+
+#### 用于同步数据的实例sql
+~~~sql
+SELECT
+	id as id,
+	name as name,
+	dept_name as deptName,
+	updated_time as updatedTime
+FROM
+	test_table
+WHERE
+-- updated_time后面必须跟< now()，否则高并发下可能会漏同步数据
+	updated_time > date_add(:sql_last_value,INTERVAL 8 HOUR) and updated_time < now()
+LIMIT :size OFFSET :offset
+
+~~~
+![picture 1](../../images/1191c95e50d14cc22293d4fac010b4bc9667a3418e592a7290debeb76476d41f.png)  
