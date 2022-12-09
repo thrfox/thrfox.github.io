@@ -8,9 +8,9 @@ tags:
   - linux
 ---
 
-###配置Supervisor开机启动：
+### 配置Supervisor开机启动：
 新建一个“supervisord.service”文件
-```
+```sh
 # dservice for systemd (CentOS 7.0+) 
 # by ET-CS (https://github.com/ET-CS) 
 [Unit] 
@@ -26,13 +26,15 @@ RestartSec=42s
 [Install] 
 WantedBy=multi-user.target
 ```
+
 将文件拷贝至：“/usr/lib/systemd/system/supervisord.service”
 `systemctl enable supervisord`
 验证一下是否为开机启动：`systemctl is-enabled supervisord
 
 
 `supervisord -c /etc/supervisor/supervisord.conf` 以该conf文件启动
-```supervisord.conf中的
+```sh 
+# supervisord.conf中的
 [include]
 supervisor.d/*.conf  加载该相对文件夹下conf文件，建议一个程序配置一个conf
 ```
@@ -46,6 +48,6 @@ startsecs=3
 stdout_logfile=/home/thrza/supervisor/IdeaServer.log
 ```
 
-###supervisor基本使用指南
+### supervisor基本使用指南
 [supervisor基本使用指南1](https://www.cnblogs.com/zhoujinyi/p/6073705.html)
 
