@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>服务器时间校对</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --card:#151d31; --line:#2b3650; --muted:#9eacc5; --text:#f3f7ff; --blue:#60a5fa; --orange:#fb923c; --green:#4adeb5; --red:#fb7185; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 85% 0%,#1c3158 0,#0b1020 42%); color:var(--text); font:15px/1.5 system-ui,-apple-system,"Microsoft YaHei",sans-serif; }
+    main { width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:42px 0 70px; }
+    .eyebrow { color:var(--blue); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
+    h1 { margin:8px 0 5px; font-size:clamp(28px,4vw,42px); letter-spacing:-.04em; }
+    .lead { margin:0 0 28px; color:var(--muted); }
+    .toolbar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
+    button, select { font:inherit; border-radius:10px; border:1px solid var(--line); color:var(--text); background:#1b2842; padding:10px 15px; }
+    button { cursor:pointer; font-weight:700; background:#2563eb; border-color:#3b82f6; }
+    button:hover { background:#3377f5; }
+    button:disabled { opacity:.55; cursor:wait; }
+    select { cursor:pointer; }
+    .meta { color:var(--muted); font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .card { background:linear-gradient(155deg,#1b2740,#131b2d 75%); border:1px solid var(--line); border-radius:18px; padding:23px; min-height:257px; box-shadow:0 18px 40px #0002; }
+    .card.local { border-top:3px solid var(--blue); }.card.taobao { border-top:3px solid var(--orange); }.card.jd { border-top:3px solid var(--red); }
+    .card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    h2 { margin:0; font-size:18px; }
+    .pill { font-size:12px; padding:3px 9px; border-radius:999px; background:#273650; color:#bac8db; white-space:nowrap; }
+    .pill.ok { color:var(--green); background:#153c3b; }.pill.bad { color:var(--red); background:#492737; }.pill.working { color:#facc15; background:#473c23; }
+    .date { margin:24px 0 2px; color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums; }
+    .time { font-size:clamp(29px,3vw,38px); line-height:1.1; font-weight:750; font-variant-numeric:tabular-nums; letter-spacing:-.035em; white-space:nowrap; }
+    .ms { color:var(--blue); }.taobao .ms { color:var(--orange); }.jd .ms { color:var(--red); }
+    .offset { margin-top:22px; font-size:14px; color:var(--muted); }
+    .offset strong { display:block; color:var(--text); font-size:25px; font-variant-numeric:tabular-nums; }
+    .detail { margin-top:13px; color:var(--muted); font-size:12px; min-height:38px; overflow-wrap:anywhere; }
+    .explain { margin-top:24px; padding:18px 22px; border:1px solid var(--line); border-radius:14px; background:#111a2c; color:var(--muted); font-size:13px; }
+    .explain b { color:var(--text); }
+    .explain p { margin:6px 0; }
+    .error { color:var(--red); }
+    @media(max-width:900px) { .grid { grid-template-columns:1fr; } .card { min-height:220px; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">MILLISECOND TIME MONITOR</div>
+  <h1>服务器时间校对</h1>
+  <p class="lead">同时查看本机、淘宝和京东时间，以及服务器相对本机的偏差。</p>
+  <div class="toolbar">
+    <button id="sync">立即校对</button>
+    <label class="meta" for="interval">自动校对</label>
+    <select id="interval"><option value="0">关闭</option><option value="15000">每 15 秒</option><option value="30000" selected>每 30 秒</option><option value="60000">每 60 秒</option></select>
+    <span class="meta" id="last">尚未校对</span>
+  </div>
+  <div class="grid">
+    <section class="card local" aria-label="本机时间"><div class="card-top"><h2>本机时间</h2><span class="pill">设备时钟</span></div><div class="date" id="local-date">--</div><div class="time" id="local-time">--:--:--<span class="ms">.---</span></div><div class="offset">作为偏差比较基准<strong>±0 ms</strong></div><div class="detail">显示时区：北京时间 UTC+8</div></section>
+    <section class="card taobao" aria-label="淘宝服务器时间"><div class="card-top"><h2>淘宝服务器</h2><span class="pill" id="taobao-status">等待校对</span></div><div class="date" id="taobao-date">--</div><div class="time" id="taobao-time">--:--:--<span class="ms">.---</span></div><div class="offset">相对本机偏差<strong id="taobao-offset">-- ms</strong></div><div class="detail" id="taobao-detail">等待接口响应</div></section>
+    <section class="card jd" aria-label="京东服务器时间"><div class="card-top"><h2>京东服务器</h2><span class="pill" id="jd-status">等待校对</span></div><div class="date" id="jd-date">--</div><div class="time" id="jd-time">--:--:--<span class="ms">.---</span></div><div class="offset">相对本机偏差<strong id="jd-offset">-- ms</strong></div><div class="detail" id="jd-detail">等待接口响应</div></section>
+  </div>
+  <div class="explain">
+    <p><b>偏差定义：</b>服务器时间 − 本机时间。正数表示服务器领先；负数表示本机领先。</p>
+    <p>每次从接口取回毫秒时间戳，并用请求往返的中点估计服务器当前时间。优先采用往返用时最短的样本。显示到毫秒不代表校时精度达到 1 毫秒；网络延迟及接口生成时间会带来误差。</p>
+    <p>接口失败时保留上次成功的时间，并标为“旧数据”；从未成功则显示空值。此页面直接访问平台接口；如果平台跨域策略不允许读取响应或响应头，会显示失败原因。</p>
+  </div>
+</main>
+<script>
+(() => {
+  const names = ['taobao', 'jd'];
+  const states = {taobao:null, jd:null};
+  const fmt = new Intl.DateTimeFormat('zh-CN', {timeZone:'Asia/Shanghai', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'});
+  const el = id => document.getElementById(id);
+  const localBase = {wall: Date.now(), perf: performance.now()};
+  function showTime(prefix, timestamp) {
+    const parts = Object.fromEntries(fmt.formatToParts(new Date(timestamp)).filter(p => p.type !== 'literal').map(p => [p.type,p.value]));
+    el(prefix+'-date').textContent = `${parts.year}-${parts.month}-${parts.day} · 北京时间 UTC+8`;
+    el(prefix+'-time').innerHTML = `${parts.hour}:${parts.minute}:${parts.second}<span class="ms">.${String(Math.floor(timestamp % 1000)).padStart(3,'0')}</span>`;
+  }
+  function status(name, label, className) {
+    const node=el(name+'-status'); node.textContent=label; node.className='pill '+className;
+  }
+  function render() {
+    const wall=Date.now(), perf=performance.now();
+    showTime('local',wall);
+    for (const name of names) {
+      const state=states[name]; if (!state) continue;
+      const estimated=state.serverTime+(perf-state.midPerf);
+      showTime(name,estimated);
+      const diff=Math.round(estimated-wall);
+      el(name+'-offset').textContent=(diff>=0?'+':'−')+Math.abs(diff)+' ms';
+      if (perf-state.midPerf>90000 && !state.failed) status(name,'等待刷新','working');
+    }
+    requestAnimationFrame(render);
+  }
+  async function sample(name) {
+    const wallStart=Date.now(), perfStart=performance.now();
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),11000);
+    try {
+      const url=name==='jd'?'https://api.m.jd.com/':'https://acs.m.taobao.com/gw/mtop.common.getTimestamp/';
+      const response=await fetch(url+'?clock='+wallStart,{mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal});
+      const wallEnd=Date.now(), perfEnd=performance.now();
+      let serverTime, endpoint;
+      if(name==='jd') {
+        const requestId=response.headers.get('x-api-request-id');
+        const match=requestId?.trim().match(/(?:^|-)(\d{13})$/);
+        if(!match) throw new Error('浏览器无法读取 x-api-request-id，可能是京东未开放跨域响应头');
+        serverTime=Number(match[1]); endpoint='京东响应头';
+      } else {
+        if(!response.ok) throw new Error('淘宝接口 HTTP '+response.status);
+        const data=await response.json();
+        serverTime=Number(data?.data?.t); endpoint='淘宝时间接口';
+      }
+      if(!Number.isInteger(serverTime) || serverTime<1500000000000 || serverTime>4000000000000) throw new Error('接口未返回有效的 13 位毫秒时间戳');
+      return {serverTime,midPerf:(perfStart+perfEnd)/2,rtt:perfEnd-perfStart,endpoint,url,midWall:(wallStart+wallEnd)/2};
+    } catch(err) {
+      if(err instanceof TypeError) throw new Error('跨域请求被浏览器拦截，平台未允许 Pages 直接访问');
+      throw err;
+    } finally { clearTimeout(timer); }
+  }
+  async function syncOne(name) {
+    status(name,'校对中','working');
+    el(name+'-detail').textContent='正在通过接口测量 3 次…';
+    const results=[], errors=[];
+    for(let i=0;i<3;i++) {
+      try { results.push(await sample(name)); }
+      catch(err) { errors.push(err.name==='AbortError'?'请求超时':err.message); }
+    }
+    if(results.length) {
+      results.sort((a,b)=>a.rtt-b.rtt);
+      const best=results[0]; states[name]={...best,failed:false};
+      status(name,'已校对','ok');
+      el(name+'-detail').classList.remove('error');
+      el(name+'-detail').textContent=`${best.endpoint} · 往返 ${Math.round(best.rtt)} ms · 半程估计 ${Math.ceil(best.rtt/2)} ms · ${new Date().toLocaleTimeString('zh-CN',{hour12:false})} 校对`;
+      el(name+'-detail').title=best.url;
+    } else {
+      if(states[name]) { states[name].failed=true; status(name,'旧数据','bad'); }
+      else status(name,'接口失败','bad');
+      el(name+'-detail').textContent=errors[0] || '接口不可用';
+      el(name+'-detail').classList.add('error');
+    }
+  }
+  let busy=false, intervalTimer;
+  async function syncAll() {
+    if(busy) return;
+    busy=true; el('sync').disabled=true; el('last').textContent='正在校对…';
+    await Promise.all(names.map(syncOne));
+    el('last').textContent='上次校对：'+new Date().toLocaleTimeString('zh-CN',{hour12:false});
+    el('sync').disabled=false; busy=false;
+  }
+  function schedule() {
+    clearInterval(intervalTimer);
+    const ms=Number(el('interval').value);
+    if(ms) intervalTimer=setInterval(syncAll,ms);
+  }
+  el('sync').addEventListener('click',syncAll);
+  el('interval').addEventListener('change',schedule);
+  schedule(); render(); syncAll();
+})();
+</script>
+</body>
+</html>
+
