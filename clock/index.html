@@ -85,7 +85,7 @@
       showTime(name,estimated);
       const diff=Math.round(estimated-wall);
       el(name+'-offset').textContent=(diff>=0?'+':'−')+Math.abs(diff)+' ms';
-      if (perf-state.midPerf>90000 && !state.failed) status(name,'等待刷新','working');
+      if (perf-state.midPerf>90000 && !state.failed) status(name,el('interval').value==='0'?'需重新校对':'等待刷新','working');
     }
     requestAnimationFrame(render);
   }
