@@ -122,6 +122,11 @@
     } finally { clearTimeout(timer); }
   }
   async function syncOne(name) {
+    if(name==='taobao' && !el('taobao-proxy').value.trim()) {
+      status(name,'需配置代理','working');
+      el(name+'-detail').textContent='填写返回 13 位毫秒时间戳的 HTTPS 代理地址';
+      return;
+    }
     status(name,'校对中','working');
     el(name+'-detail').textContent='正在通过接口测量 3 次…';
     const results=[], errors=[];
