@@ -13,14 +13,12 @@
     h1 { margin:8px 0 5px; font-size:clamp(28px,4vw,42px); letter-spacing:-.04em; }
     .lead { margin:0 0 28px; color:var(--muted); }
     .toolbar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:24px; }
-    button, select, input { font:inherit; border-radius:10px; border:1px solid var(--line); color:var(--text); background:#1b2842; padding:10px 15px; }
+    button, select { font:inherit; border-radius:10px; border:1px solid var(--line); color:var(--text); background:#1b2842; padding:10px 15px; }
     button { cursor:pointer; font-weight:700; background:#2563eb; border-color:#3b82f6; }
     button:hover { background:#3377f5; }
     button:disabled { opacity:.55; cursor:wait; }
     select { cursor:pointer; }
     .meta { color:var(--muted); font-size:13px; }
-    .proxy-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:-6px 0 24px; }
-    .proxy-row input { width:min(460px,100%); }
     .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
     .card { background:linear-gradient(155deg,#1b2740,#131b2d 75%); border:1px solid var(--line); border-radius:18px; padding:23px; min-height:257px; box-shadow:0 18px 40px #0002; }
     .card.local { border-top:3px solid var(--blue); }.card.taobao { border-top:3px solid var(--orange); }.card.jd { border-top:3px solid var(--red); }
@@ -52,7 +50,6 @@
     <select id="interval"><option value="0">关闭</option><option value="15000">每 15 秒</option><option value="30000" selected>每 30 秒</option><option value="60000">每 60 秒</option></select>
     <span class="meta" id="last">尚未校对</span>
   </div>
-  <div class="proxy-row"><label class="meta" for="taobao-proxy">淘宝毫秒接口代理</label><input id="taobao-proxy" type="url" placeholder="https://你的-worker.workers.dev/taobao-time" autocomplete="url"><span class="meta">填入后会保存在此浏览器</span></div>
   <div class="grid">
     <section class="card local" aria-label="本机时间"><div class="card-top"><h2>本机时间</h2><span class="pill">设备时钟</span></div><div class="date" id="local-date">--</div><div class="time" id="local-time">--:--:--<span class="ms">.---</span></div><div class="offset">作为偏差比较基准<strong>±0 ms</strong></div><div class="detail">显示时区：北京时间 UTC+8</div></section>
     <section class="card taobao" aria-label="淘宝服务器时间"><div class="card-top"><h2>淘宝服务器</h2><span class="pill" id="taobao-status">等待校对</span></div><div class="date" id="taobao-date">--</div><div class="time" id="taobao-time">--:--:--<span class="ms">.---</span></div><div class="offset">相对本机偏差<strong id="taobao-offset">-- ms</strong></div><div class="detail" id="taobao-detail">等待接口响应</div></section>
@@ -61,7 +58,7 @@
   <div class="explain">
     <p><b>偏差定义：</b>服务器时间 − 本机时间。正数表示服务器领先；负数表示本机领先。</p>
     <p>每次从接口取回毫秒时间戳，并用请求往返的中点估计服务器当前时间。优先采用往返用时最短的样本。显示到毫秒不代表校时精度达到 1 毫秒；网络延迟及接口生成时间会带来误差。</p>
-    <p>淘宝原接口禁止此页面跨域读取，需要一个返回原始 13 位毫秒时间戳的代理接口。京东直接读取响应头。接口失败时保留上次成功时间并标为“旧数据”；从未成功则显示空值。</p>
+    <p>淘宝通过 clock-api.mazq.cn 获取原始 13 位毫秒时间戳，京东直接读取响应头。接口失败时保留上次成功时间并标为“旧数据”；从未成功则显示空值。</p>
   </div>
 </main>
 <script>
@@ -70,7 +67,6 @@
   const states = {taobao:null, jd:null};
   const fmt = new Intl.DateTimeFormat('zh-CN', {timeZone:'Asia/Shanghai', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'});
   const el = id => document.getElementById(id);
-  el('taobao-proxy').value=localStorage.getItem('taobao-time-proxy') || '';
   const localBase = {wall: Date.now(), perf: performance.now()};
   function showTime(prefix, timestamp) {
     const parts = Object.fromEntries(fmt.formatToParts(new Date(timestamp)).filter(p => p.type !== 'literal').map(p => [p.type,p.value]));
@@ -98,8 +94,7 @@
     const controller=new AbortController();
     const timer=setTimeout(()=>controller.abort(),11000);
     try {
-      const url=name==='jd'?'https://api.m.jd.com/':el('taobao-proxy').value.trim();
-      if(name==='taobao' && !/^https:\/\//i.test(url)) throw new Error('请填写 HTTPS 淘宝毫秒接口代理地址');
+      const url=name==='jd'?'https://api.m.jd.com/':'https://clock-api.mazq.cn/taobao-time';
       const target=url+(url.includes('?')?'&':'?')+'clock='+wallStart;
       const response=await fetch(target,{mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal});
       const wallEnd=Date.now(), perfEnd=performance.now();
@@ -122,11 +117,6 @@
     } finally { clearTimeout(timer); }
   }
   async function syncOne(name) {
-    if(name==='taobao' && !el('taobao-proxy').value.trim()) {
-      status(name,'需配置代理','working');
-      el(name+'-detail').textContent='填写返回 13 位毫秒时间戳的 HTTPS 代理地址';
-      return;
-    }
     status(name,'校对中','working');
     el(name+'-detail').textContent='正在通过接口测量 3 次…';
     const results=[], errors=[];
@@ -162,7 +152,6 @@
     if(ms) intervalTimer=setInterval(syncAll,ms);
   }
   el('sync').addEventListener('click',syncAll);
-  el('taobao-proxy').addEventListener('change',()=>{localStorage.setItem('taobao-time-proxy',el('taobao-proxy').value.trim());syncAll();});
   el('interval').addEventListener('change',schedule);
   schedule(); render(); syncAll();
 })();
