@@ -47,7 +47,7 @@
   <div class="toolbar">
     <button id="sync">立即校对</button>
     <label class="meta" for="interval">自动校对</label>
-    <select id="interval"><option value="0">关闭</option><option value="15000">每 15 秒</option><option value="30000" selected>每 30 秒</option><option value="60000">每 60 秒</option></select>
+    <select id="interval"><option value="0" selected>关闭</option><option value="15000">每 15 秒</option><option value="30000">每 30 秒</option><option value="60000">每 60 秒</option></select>
     <span class="meta" id="last">尚未校对</span>
   </div>
   <div class="grid">
@@ -57,7 +57,7 @@
   </div>
   <div class="explain">
     <p><b>偏差定义：</b>服务器时间 − 本机时间。正数表示服务器领先；负数表示本机领先。</p>
-    <p>每次从接口取回毫秒时间戳，并用请求往返的中点估计服务器当前时间。优先采用往返用时最短的样本。显示到毫秒不代表校时精度达到 1 毫秒；网络延迟及接口生成时间会带来误差。</p>
+    <p>打开页面时自动校对一次，之后默认关闭自动校对；需要时可手动校对或选择自动校对间隔。每次从接口取回毫秒时间戳，并用请求往返的中点估计服务器当前时间。优先采用往返用时最短的样本。显示到毫秒不代表校时精度达到 1 毫秒；网络延迟及接口生成时间会带来误差。</p>
     <p>淘宝通过 clock-api.mazq.cn 获取原始 13 位毫秒时间戳，京东直接读取响应头。接口失败时保留上次成功时间并标为“旧数据”；从未成功则显示空值。</p>
   </div>
 </main>
